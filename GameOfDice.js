@@ -68,7 +68,7 @@ function printScoreBoard(playerList){
 
 async function main() {
 	
-    let N = await ask("\nEnter the number of players? ", "^[2-9]");
+    let N = await ask("\nEnter the number of players?(more than 1 player) ", "^[2-9]");
     let M = await ask("\nEnter the total points to win? ", "^[0-9]");
     const max = 6;
     const min = 1;
@@ -102,7 +102,7 @@ async function main() {
 
                 playerList[i].playTurn = !(score == 1 && playerList[i].previousScore == 1)
 
-                if (!playerList[i].playTurn) {
+                if (!playerList[i].playTurn && playerList[i].score < M) {
 					                    
                     console.log(`${playerList[i].playerName} have rolled 1s consecutively twice and will skip the next turn as penality`)
                 }
@@ -127,7 +127,7 @@ async function main() {
                 }
             } else if(playerList[i].rank == N+1){
                 playerList[i].playTurn = true;
-                previousScoreList[playerList[i] - 1] = 0;
+                playerList[i].previousScore = 0;
             }
         }
 		printScoreBoard(playerList);
