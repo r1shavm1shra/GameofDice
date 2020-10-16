@@ -68,7 +68,7 @@ function printScoreBoard(playerList){
 
 async function main() {
 	
-    let N = await ask("\nEnter the number of players? ", "^[0-9]");
+    let N = await ask("\nEnter the number of players? ", "^[2-9]");
     let M = await ask("\nEnter the total points to win? ", "^[0-9]");
     const max = 6;
     const min = 1;
