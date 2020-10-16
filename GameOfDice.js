@@ -84,7 +84,7 @@ async function main() {
 		
     }
 
-	console.log(JSON.stringify(playerList));
+	
 
     while (rankList.length < N) {
         shuffle(playerList);
