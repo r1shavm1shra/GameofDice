@@ -45,12 +45,17 @@ async function ask(question, format) {
 
 function printRankBoard(rankList){
 	
-	let output = '';
+    
+    
+    if(rankList.length>0){
+    console.log('Current Ranking Board');
+    console.log('Player Rank Score');
 	for (var i = 0; i < rankList.length; i++) {
-		output += rankList[i].playerName + " " 
+        
+            console.log(`\n${rankList[i].playerName} ${rankList[i].rank} ${rankList[i].score}`);
+        
     }
-	if(rankList.length>0){
-		console.log(`\nCurrent ranking board \n ${output}`);
+    		
 	}
 }
 
@@ -66,75 +71,98 @@ function printScoreBoard(playerList){
 	
 }
 
+let rank = 1;
+
 async function main() {
 	
     let N = await ask("\nEnter the number of players?(more than 1 player) ", "^[2-9]");
     let M = await ask("\nEnter the total points to win? ", "^[0-9]");
+    
     const max = 6;
     const min = 1;
-	let rank = 1;
     let playerList = [];
 	let rankList = [];
     
 
     for (var i = 0; i < N; i++) {
-	    let player = { playerName : "", score : 0, previousScore : 0, rank: N+1, playTurn: true,  };
+        let player = { playerName : "", score : 0, previousScore : 0, rank: 0, playTurn: true, playerIndex :0 };
+        player.playerIndex = i;
 		player.playerName = "Player-"+ (i + 1);
         playerList.push(player);
 		
     }
 
-	
-
-    while (rankList.length < N) {
-        shuffle(playerList);
-
+    
+    shuffle(playerList);
+    let turn =0;
+    while (rank <= playerList.length) {
+        turn = turn+1;
         for (var i = 0; i < playerList.length; i++) {
 
-            if (playerList[i].playTurn) {
-
-                await ask("\n" + playerList[i].playerName + " its your turn(Press r to roll the dice)", "^[r]")
-
-
-                score = Math.floor(Math.random() * Math.floor(max) + min);
-				console.log(`${playerList[i].playerName} scored ${score} point(s)`)
-                playerList[i].score += score;
-
-                playerList[i].playTurn = !(score == 1 && playerList[i].previousScore == 1)
-
-                if (!playerList[i].playTurn && playerList[i].score < M) {
-					                    
-                    console.log(`${playerList[i].playerName} have rolled 1s consecutively twice and will skip the next turn as penality`)
-                }
-
-                if (score == 6 && playerList[i].score < M) {
-                    
-					await ask("\n" + playerList[i].playerName + " have rolled a 6 point/s and gets one more chance(press r to roll the dice)", "^[r]")
-                    score = Math.floor(Math.random() * Math.floor(max) + min);
-					console.log(`${playerList[i].playerName} scored ${score} point(s)`)
-                    playerList[i].score += score;
-					
-                }
-
-                playerList[i].previousScore = score;
-                if (playerList[i].score >= M) {
-
-                    playerList[i].rank = rank;
-					playerList[i].playTurn = false;
-                    rank = rank+1;
-                    rankList.push(playerList[i]);
-					
-                }
-            } else if(playerList[i].rank == N+1){
-                playerList[i].playTurn = true;
-                playerList[i].previousScore = 0;
-            }
+            rank = UpdatePlayerScore(playerList[i], N, M , rank, rankList, turn);
+            
         }
 		printScoreBoard(playerList);
-		printRankBoard(rankList);
+		printRankBoard( rankList);
+    }
+    
+    process.exit();
+}
+
+function UpdatePlayerScore(player, N, M , rank, rankList, turn){
+    
+    if(rank > N)
+    {
+        return rank;
     }
 
-    process.exit();
+    
+
+if (player.playTurn) {
+
+    //await ask("\n" + player.playerName + " its your turn(Press r to roll the dice)", "^[r]")
+    
+    //Generate
+    score = Math.floor(Math.random() * Math.floor(6) + 1);
+    //store in tbl_game_turn
+
+    // Retreive
+    //get score from tbl_game_turn
+
+    console.log(`${player.playerName} scored ${score} point(s)`)
+    player.score += score;
+
+    player.playTurn = !(score == 1 && player.previousScore == 1)
+    
+    if (!player.playTurn && player.score < M) {
+                            
+        console.log(`${player.playerName} have rolled 1s consecutively twice and will skip the next turn as penality`)
+    }
+
+    if (score == 6 && player.score < M) {
+        
+        //ask("\n" + player.playerName + " have rolled a 6 point/s and gets one more chance(press r to roll the dice)", "^[r]")
+        console.log(player.playerName + " have rolled a 6 point/s and gets one more chance(press r to roll the dice)");
+        rank = UpdatePlayerScore(player, N, M, rank, rankList, turn)
+        
+    }
+
+    player.previousScore = score;
+    if (player.score >= M && player.rank == 0) {
+
+        player.rank = rank;
+        player.playTurn = false;
+        rankList.push(player);
+        rank = rank+1;
+    }
+
+    
+} else if(player.rank == 0){
+    player.playTurn = true;
+    player.previousScore = 0;
+}
+
+return rank;
 }
 
 main();
